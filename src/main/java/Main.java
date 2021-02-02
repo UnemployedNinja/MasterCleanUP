@@ -17,6 +17,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class Main {
 
+    public static final String YELLOW = "\033[0;33m"; // YELLOW COLOR
+    public static final String WHITE = "\033[0;37m";   // WHITE COLOR
+
     /**
      * Error
      * Description:
@@ -203,10 +206,16 @@ public class Main {
         Report report = null;
         boolean validReport = false;
 
+        // Message to the User on the Console
+        System.out.println(YELLOW + "For this project to work, the report entered will need");
+        System.out.println(YELLOW + "the ID, Application, and the Acct/Dept. If any of those");
+        System.out.println(YELLOW + "are missing the code will fail. It depends on those to");
+        System.out.println(YELLOW + "edit the tickets in the report. Add columns if necessary");
+
         // Login to TD
         try {
             tdapi.login();
-            System.out.println("Login Successful!");
+            System.out.println(WHITE + "Login Successful!");
         } catch (TDException e) {
             e.printStackTrace();
         }
@@ -228,6 +237,6 @@ public class Main {
         // TODO: Remove hard coded cleanup type
         String cleanUpType =  "LOCATION"; // ui.cleanUpType();
         // clean up, clean up, everybody clean up!
-        readReportData(report, cleanUpType, tdapi);
+//        readReportData(report, cleanUpType, tdapi);
     }
 }
