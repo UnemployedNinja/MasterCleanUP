@@ -214,8 +214,9 @@ public class Main {
         // Get valid TD report
         while (!validReport){
 
+            // TODO: removed hard coded report
             try {
-                int reportID = ui.getReportID();
+                int reportID = 15495;// ui.getReportID();
                 report = tdapi.getReport(reportID, true, null);
                 validReport = true;
             } catch (TDException e) {
@@ -224,7 +225,8 @@ public class Main {
             }
         }
 
-        String cleanUpType = ui.cleanUpType();
+        // TODO: Remove hard coded cleanup type
+        String cleanUpType =  "LOCATION"; // ui.cleanUpType();
         // clean up, clean up, everybody clean up!
         readReportData(report, cleanUpType, tdapi);
     }
