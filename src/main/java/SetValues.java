@@ -145,25 +145,5 @@ public class SetValues {
         return acct;
     }
 
-    public static void addToCleanUpAttributeList(List<Integer> cleanUpAttributeList, String cleanUpType, String key) {
-
-        switch (cleanUpType) {
-            case "LOCATION":
-                cleanUpAttributeList.add(1);
-                break;
-            case "CLOSED":
-                cleanUpAttributeList.add(setStatusClosedID(key));
-                break;
-            case "CANCELLED":
-                cleanUpAttributeList.add(setStatusCancelledID(key));
-                break;
-            // TODO: Fix the acct/dept process.
-            case "ACCT":
-                System.out.println("No acct/dept as of right now. ");
-                break;
-            default:
-                break;
-        }
-    }
 
 }

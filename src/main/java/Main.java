@@ -1,13 +1,8 @@
-import td.api.JsonPatchArray;
-import td.api.Report;
-import td.api.TDException;
-import td.api.TeamDynamix;
-
+import td.api.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Starts up the program and edits the tickets
@@ -66,62 +61,9 @@ public class Main {
         }
     }
 
-    /**
-     * Edit Actual Tickets
-     * Description:
-     *
-     *
-     * @Param List ticketIDsList
-     * @Param List appIDsList
-     * @Param List cleanupAttributeList
-     * @Param String cleanUpType
-     * @Param TeamDynamix tdapi
-     */
-    public static void editActualTickets(List<Integer> ticketIDsList, List<Integer> appIDsList,
-                                         List<Integer> cleanupAttributeList, String cleanUpType,
-                                         TeamDynamix tdapi) {
+    public static void getRequestorTrack(Ticket ticket) {
 
-        // JsonPatchArray is a class in the api package
-        JsonPatchArray patch = new JsonPatchArray();
-
-        // What kind of cleanup is it?
-        String path = "";
-        switch (cleanUpType) {
-            case "LOCATION":
-                path = "LocationID";
-                break;
-            case "CLOSED":
-                path = "StatusID";
-                break;
-            case "CANCELLED":
-                path = "StatusID";
-                break;
-            case "ACCT":
-                path = "AccountID";
-                break;
-        }
-
-        for (int i = 0; i < ticketIDsList.size(); i++) {
-
-            patch.addPatchOperation(JsonPatchArray.ADD_OP, path, cleanupAttributeList.get(i));
-            // This will patch the ticket
-            try {
-                tdapi.patchTicket(appIDsList.get(i), false, ticketIDsList.get(i), patch);
-            } catch (TDException e) {
-                e.printStackTrace();
-            }
-
-            // forces program to do one request per second to prevent rate limit errors
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println("The ticketID edited is: " + ticketIDsList.get(i));
-
-        }
     }
-
     /**
      * Read Report Data
      * Description:
@@ -135,10 +77,8 @@ public class Main {
     public static void readReportData(Report report, String cleanUpType, TeamDynamix tdapi) {
 
         // Variables to set up while reading the report
-        List<Integer> ticketIDsList = new ArrayList<>();
-        List<Integer> appIDsList = new ArrayList<>();
         List<Integer> errorList = new ArrayList<>();
-        List<Integer> cleanUpAttributeList = new ArrayList<>();
+        Ticket ticket = new Ticket();
         int currentTicket = 0;
 
         SetValues setValues = new SetValues();
@@ -154,39 +94,47 @@ public class Main {
                     // row.get(key) saves the ticketID in a string like "123456.0"
                     // this will lose the floating point number
                     int value = (int) Float.parseFloat(row.get(key));
-                    ticketIDsList.add(value);
                     currentTicket = (value);
-
                 }
                 if (key.equals("AppName")) {
 
-                    String appID = row.get(key);
-                    appIDsList.add(setValues.setApplicationID(appID));
-                    // add data to clean up attribute list
-                    setValues.addToCleanUpAttributeList(cleanUpAttributeList, cleanUpType, row.get(key));
-
-                    if (setValues.setApplicationID(row.get(key)) == 0)
-                    {
+                    int currentApplicationID = setValues.setApplicationID(row.get(key));
+//                    // add data to clean up attribute list
+                    try {
+                        ticket = tdapi.getTicket(currentApplicationID, currentTicket);
+                    } catch (TDException e) {
+                        e.printStackTrace();
+                    }
+                    // Set list of error tickets
+                    if (setValues.setApplicationID(row.get(key)) == 0) {
                         System.out.println("Invalid Application! TicketID: " + currentTicket);
                         errorList.add(currentTicket);
+                    } else {
+                        // Clean up data. Key in this statement is the application ID
 
-                        // remove added data because there was an error
-                        ticketIDsList.remove(ticketIDsList.size() - 1);
-                        appIDsList.remove(appIDsList.size() - 1);
-                        cleanUpAttributeList.remove(cleanUpAttributeList.size() - 1);
+                        switch (cleanUpType) {
+                            case "LOCATION":
+                                ticket.setLocationId(1);
+                            case "CLOSED":
+                                ticket.setStatusId(setValues.setStatusClosedID(key));
+                            case "CANCELLED":
+                                ticket.setStatusId(setValues.setStatusCancelledID(key));
+                            case "ACCT":
+                                getRequestorTrack(ticket);
+                            default:
+                                break;
+                        }
                     }
                 }
+                // wipe temp ticket data
+                ticket = null;
+            }
+
+            // Are there errors in the read?
+            if (!errorList.isEmpty()) {
+                error(errorList);
             }
         }
-
-        System.out.println("The amount of successfully read tickets in the report is: " + ticketIDsList.size());
-        // displayIntegerList(cleanUpAttributeList);
-
-        // Are there errors in the read?
-        if (!errorList.isEmpty()) {
-            error(errorList);
-        }
-        editActualTickets(ticketIDsList, appIDsList, cleanUpAttributeList, cleanUpType, tdapi);
     }
 
     /**
@@ -208,9 +156,9 @@ public class Main {
 
         // Message to the User on the Console
         System.out.println(YELLOW + "For this project to work, the report entered will need");
-        System.out.println(YELLOW + "the ID, Application, and the Acct/Dept. If any of those");
+        System.out.println(YELLOW + "the Ticket ID, and Application as columns. If any of those");
         System.out.println(YELLOW + "are missing the code will fail. It depends on those to");
-        System.out.println(YELLOW + "edit the tickets in the report. Add columns if necessary");
+        System.out.println(YELLOW + "edit the tickets in the report. ADD COLUMNS IF NECESSARY!");
 
         // Login to TD
         try {
@@ -237,6 +185,7 @@ public class Main {
         // TODO: Remove hard coded cleanup type
         String cleanUpType =  "LOCATION"; // ui.cleanUpType();
         // clean up, clean up, everybody clean up!
-//        readReportData(report, cleanUpType, tdapi);
+        readReportData(report, cleanUpType, tdapi);
     }
 }
+
