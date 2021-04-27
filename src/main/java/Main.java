@@ -22,7 +22,7 @@ public class Main {
      *
      * @Param List errorList
      */
-    public static void error(List<Integer> errorList) {
+    public void error(List<Integer> errorList) {
 
         String userInput = "";
         Scanner sc = new Scanner(System.in);
@@ -54,14 +54,14 @@ public class Main {
     }
 
     // Used for testing purposes
-    public static void displayIntegerList(List<Integer> myList) {
+    public void displayIntegerList(List<Integer> myList) {
 
         for (Integer num: myList) {
             System.out.println(num);
         }
     }
 
-    public static void getRequestorTrack(Ticket ticket) {
+    public void getRequestorTrack(Ticket ticket) {
 
     }
     /**
@@ -74,7 +74,7 @@ public class Main {
      * @Param String cleanUpType
      * @Param TeamDynamix tdapi
      */
-    public static void readReportData(Report report, String cleanUpType, TeamDynamix tdapi) {
+    public void readReportData(Report report, String cleanUpType, TeamDynamix tdapi) {
 
         // Variables to set up while reading the report
         List<Integer> errorList = new ArrayList<>();
@@ -120,7 +120,7 @@ public class Main {
                             case "CANCELLED":
                                 ticket.setStatusId(setValues.setStatusCancelledID(key));
                             case "ACCT":
-                                getRequestorTrack(ticket);
+                                ticket.setStatusId(setValues.setAccountDepartment());
                             default:
                                 break;
                         }
@@ -142,7 +142,7 @@ public class Main {
      * Description:
      *     Starts to program, Logs into TD, Gets the Report, and Calls for a cleanup.
      */
-    public static void main(String[] args) {
+    public void main(String[] args) {
 
         String basePath = System.getenv("tdbasepath");
         String username = System.getenv("tduser");

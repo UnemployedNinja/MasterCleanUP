@@ -1,8 +1,15 @@
+import com.sun.org.apache.bcel.internal.generic.LoadClass;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class SetValues {
 
-    public static int setApplicationID(String app) {
+    public int setApplicationID(String app) {
 
         int appID;
 
@@ -48,7 +55,7 @@ public class SetValues {
 
     }
 
-    public static int setStatusClosedID(String app) {
+    public int setStatusClosedID(String app) {
 
         int statusID;
 
@@ -93,7 +100,7 @@ public class SetValues {
         }
     }
 
-    public static int setStatusCancelledID(String app) {
+    public int setStatusCancelledID(String app) {
 
         int statusID;
 
@@ -138,12 +145,22 @@ public class SetValues {
         }
     }
 
-    public static int setAccountDepartment(String app) {
+    public int setAccountDepartment() {
 
+        // TODO: what is the track of the requestor
         int acct = 0;
+        Date today = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(today);
+
+        int month = cal.get(Calendar.MONTH);
+
+        if(month <= 4) {
+            acct = 548;
+        } else if (month <= 8) {
+            acct = 548;
+        }
 
         return acct;
     }
-
-
 }
